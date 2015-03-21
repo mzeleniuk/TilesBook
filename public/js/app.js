@@ -2,21 +2,21 @@
 
     var contacts = [
         { name: "Contact 1", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789",
-            email: "anemail@me.com", type: "Family" },
+            email: "user@me.com", type: "Family" },
         { name: "Contact 2", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789",
-            email: "anemail@me.com", type: "Family" },
+            email: "user@me.com", type: "Family" },
         { name: "Contact 3", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789",
-            email: "anemail@me.com", type: "Friend" },
+            email: "user@me.com", type: "Friend" },
         { name: "Contact 4", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789",
-            email: "anemail@me.com", type: "Colleague" },
+            email: "user@me.com", type: "Colleague" },
         { name: "Contact 5", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789",
-            email: "anemail@me.com", type: "Family" },
+            email: "user@me.com", type: "Family" },
         { name: "Contact 6", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789",
-            email: "anemail@me.com", type: "Colleague" },
+            email: "user@me.com", type: "Colleague" },
         { name: "Contact 7", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789",
-            email: "anemail@me.com", type: "Friend" },
+            email: "user@me.com", type: "Friend" },
         { name: "Contact 8", address: "1, a street, a town, a city, AB12 3CD", tel: "0123456789",
-            email: "anemail@me.com", type: "Family" }
+            email: "user@me.com", type: "Family" }
     ];
 
     var Contact = Backbone.Model.extend({
@@ -38,6 +38,7 @@
         tagName: "article",
         className: "contact-container",
         template: _.template($("#contactTemplate").html()),
+        editTemplate: _.template($("#contactEditTemplate").html()),
 
         render: function () {
             this.$el.html(this.template(this.model.toJSON()));
@@ -45,7 +46,11 @@
         },
 
         events: {
-            "click button.delete": "deleteContact"
+            "click button.delete": "deleteContact",
+            "click button.edit": "editContact",
+            "change select.type": "addType",
+            "click button.save": "saveEdits",
+            "click button.cancel": "cancelEdit"
         },
 
         deleteContact: function () {
@@ -58,6 +63,63 @@
             if (_.indexOf(directory.getTypes(), removedType) === -1) {
                 directory.$el.find("#filter select").children("[value='" + removedType + "']").remove();
             }
+        },
+
+        editContact: function () {
+            this.$el.html(this.editTemplate(this.model.toJSON()));
+
+            var newOpt = $("<option/>", {
+                html: "<em>Add new...</em>",
+                value: "addType"
+            });
+
+            this.select = directory.createSelect().addClass("type").val(this.$el.find("#type").val()).append(newOpt).insertAfter(this.$el.find(".name"));
+            this.$el.find("input[type='hidden']").remove();
+        },
+
+        addType: function () {
+            if (this.select.val() === "addType") {
+
+                this.select.remove();
+
+                $("<input />", {
+                    "class": "type"
+                }).insertAfter(this.$el.find(".name")).focus();
+            }
+        },
+
+        saveEdits: function (e) {
+            e.preventDefault();
+
+            var formData = {},
+                prev = this.model.previousAttributes();
+
+            $(e.target).closest("form").find(":input").not("button").each(function () {
+                var el = $(this);
+                formData[el.attr("class")] = el.val();
+            });
+
+            if (formData.photo === "") {
+                delete formData.photo;
+            }
+
+            this.model.set(formData);
+
+            this.render();
+
+            if (prev.photo === "images/placeholder.png") {
+                delete prev.photo;
+            }
+
+            _.each(contacts, function (contact) {
+                if (_.isEqual(contact, prev)) {
+                    contacts.splice(_.indexOf(contacts, contact), 1, formData);
+                }
+            });
+        },
+
+        cancelEdit: function () {
+            this.render();
         }
     });
 
@@ -166,7 +228,7 @@
         removeContact: function (removedModel) {
             var removed = removedModel.attributes;
 
-            if (removed.photo === "/img/placeholder.png") {
+            if (removed.photo === "/images/placeholder.png") {
                 delete removed.photo;
             }
 

@@ -1,4 +1,8 @@
-﻿.contact-container {
+﻿body {
+	background-color: #F2F2F2;
+}
+
+.contact-container {
 	width: 400px;
 	padding: 10px;
 	border: 1px solid #aaa;
@@ -115,4 +119,31 @@ header:after {
 	margin: 10px 10px 0 0;
 	float: right;
 	clear: both;
+}
+
+.contact-container input, .contact-container select {
+	display: block;
+	margin: 0;
+	float: left;
+}
+
+.contact-container .name, .contact-container .address {
+	clear: left;
+}
+
+.contact-container input {
+	margin: 0 10px 1px 0;
+}
+
+.contact-container .address {
+	width: 395px;
+	margin-right: 0;
+}
+
+.contact-container .tel {
+	width: 90px;
+}
+
+.contact-container form button {
+	margin: 2px 0 0;
 }
